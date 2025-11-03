@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Você Saiu - FeedPet{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-lg-7">
+    <div class="card shadow-lg border-0 text-center" style="border-radius: 1rem;">
+      <div class="card-body p-4 p-md-5">
+        
+        <!-- Ícone amigável -->
+        <span class="display-3" role="img" aria-label="Acenando">👋</span>
+        
+        <h1 class="card-title h2 fw-bold text-theme-brown mt-4 mb-3">Você saiu com sucesso.</h1>
+        
+        <p class="lead text-muted">Obrigado por visitar o FeedPet. Esperamos ver você novamente em breve!</p>
+        
+        <!-- Botão com a classe do nosso tema -->
+        <a href="{% url 'galeria_pets' %}" class="btn btn-theme-orange btn-lg mt-4 shadow-sm">
+          Voltar para a Galeria
+        </a>
+        
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }} - FeedPet{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-section-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out both;
+  }
+  .form-section-header {
+    background-color: rgba(var(--primary-rgb), 0.05);
+    border-bottom: 1px solid var(--border);
+    color: var(--primary);
+  }
+  .form-label { font-weight: 600; }
+  
+  /* --- Upload de Arquivos Customizado --- */
+  .custom-file-input {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .custom-file-input:hover { border-color: var(--primary); }
+  .file-name { color: var(--text-secondary); font-style: italic; }
+
+  /* --- Pré-visualização de Imagens --- */
+  .image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .image-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius);
+    border: 2px dashed var(--border);
+    background-color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .image-preview img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .image-preview-placeholder {
+    font-size: 2.5rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+  
+  /* --- Remoção de Fotos --- */
+  .removal-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+  .removal-item {
+    position: relative;
+  }
+  .removal-item img {
+    width: 100%; height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+  .removal-item .form-check {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+  }
+  .removal-item .form-check-input {
+    width: 2em; height: 2em;
+    background-color: white;
+    border: 2px solid var(--danger);
+    cursor: pointer;
+  }
+  .removal-item .form-check-input:checked {
+    background-color: var(--danger);
+    border-color: var(--danger);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l4 4l4-4'/%3e%3c/svg%3e");
+  }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9 col-md-11">
+    
+    <div class="text-center mb-5">
+      <h1 class="fw-bold">{{ page_title }}</h1>
+      <p class="text-secondary">Preencha os detalhes abaixo para encontrar um novo lar para seu amigo.</p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      
+      <div class="form-section-card mb-4" style="animation-delay: 100ms;">
+        <div class="form-section-header p-3">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-person-vcard-fill me-2"></i>Informações Básicas</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-12">{{ form.nome.label_tag }} {{ form.nome }}</div>
+            <div class="col-md-6">{{ form.especie.label_tag }} {{ form.especie }}</div>
+            {% if user.is_staff and form.status %}
+              <div class="col-md-6">{{ form.status.label_tag }} {{ form.status }}</div>
+            {% endif %}
+            <div class="col-md-8">{{ form.raca.label_tag }} {{ form.raca }}</div>
+            <div class="col-md-4">{{ form.idade.label_tag }} {{ form.idade }}</div>
+            <div class="col-12">{{ form.descricao.label_tag }} {{ form.descricao }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section-card" style="animation-delay: 250ms;">
+        <div class="form-section-header p-3">
+          <h5 class="mb-0 fw-bold"><i class="bi bi-images me-2"></i>Mídia do Pet</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-4">
+            <div class="col-12">
+              <label for="id_foto_principal" class="form-label">{{ form.foto_principal.label }}</label>
+              <input type="file" name="foto_principal" class="form-control" id="id_foto_principal" accept="image/*" onchange="previewImage(event, 'preview-main')">
+              <div class="image-preview-container">
+                <div class="image-preview" id="preview-main">
+                  {% if form.instance.foto_principal %}
+                    <img src="{{ form.instance.foto_principal.url }}" alt="Preview da foto principal">
+                  {% else %}
+                    <i class="bi bi-camera-fill image-preview-placeholder"></i>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="id_fotos_adicionais" class="form-label">{{ form.fotos_adicionais.label }}</label>
+              <input type="file" name="fotos_adicionais" class="form-control" id="id_fotos_adicionais" accept="image/*" multiple onchange="previewMultipleImages(event, 'preview-additional')">
+              <div class="image-preview-container" id="preview-additional">
+                </div>
+            </div>
+
+            {% if fotos_extras %}
+              <div class="col-12">
+                <label class="form-label">Remover fotos existentes</label>
+                <div class="p-3 rounded-3" style="background: var(--bg); border: 1px solid var(--border);">
+                  <div class="removal-list">
+                    {% for photo_choice in form.fotos_extras_remover %}
+                      <div class="removal-item">
+                        <img src="{{ photo_choice.instance.imagem.url }}" alt="Foto para remover">
+                        {{ photo_choice.tag }}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <a href="{% url 'galeria_pets' %}" class="btn btn-outline-secondary btn-lg">Cancelar</a>
+        <button type="submit" class="btn btn-primary btn-lg">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          {% if form.instance.slug %}Salvar Alterações{% else %}Cadastrar Pet{% endif %}
+        </button>
+      </div>
+    </form>
+    
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function previewImage(event, previewId) {
+    const previewContainer = document.getElementById(previewId);
+    previewContainer.innerHTML = ''; // Limpa o preview anterior
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        previewContainer.appendChild(img);
+      }
+      reader.readAsDataURL(file);
+    } else {
+      previewContainer.innerHTML = '<i class="bi bi-camera-fill image-preview-placeholder"></i>';
+    }
+  }
+
+  function previewMultipleImages(event, containerId) {
+    const previewContainer = document.getElementById(containerId);
+    previewContainer.innerHTML = ''; // Limpa previews anteriores
+    const files = event.target.files;
+    if (files) {
+      for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewWrapper = document.createElement('div');
+          previewWrapper.className = 'image-preview';
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          previewWrapper.appendChild(img);
+          previewContainer.appendChild(previewWrapper);
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+</script>
+{% endblock %}

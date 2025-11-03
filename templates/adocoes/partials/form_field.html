@@ -1,0 +1,31 @@
+<!-- Partial template para um único campo de formulário -->
+<div class="form-floating mb-3 position-relative">
+  <!-- Campo de formulário com classes Bootstrap -->
+  {{ field|add_class:"form-control form-control-lg rounded-3" }}
+
+  <!-- Label flutuante -->
+  <label for="{{ field.id_for_label }}" class="text-theme-brown fw-semibold">
+    {{ field.label }}
+  </label>
+
+  <!-- Texto de ajuda (opcional) -->
+  {% if field.help_text %}
+    <small class="form-text text-muted d-block mt-1">{{ field.help_text }}</small>
+  {% endif %}
+
+  <!-- Mensagens de erro -->
+  {% if field.errors %}
+    <div class="invalid-feedback d-block mt-1">
+      {% for error in field.errors %}
+        <div>⚠️ {{ error }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Ícone de validação (opcional, apenas visual) -->
+  {% if field.errors %}
+    <span class="position-absolute top-50 end-0 translate-middle-y me-3 text-danger">
+      ❌
+    </span>
+  {% endif %}
+</div>

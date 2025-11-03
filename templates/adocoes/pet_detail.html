@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pet.nome }} | Detalhes do Pet - FeedPet{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Componentes temáveis */
+  .pet-detail-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Galeria */
+  .pet-gallery .main-media-display .ratio {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #0000000d;
+    box-shadow: var(--shadow-sm);
+  }
+  .pet-gallery .main-media-display .img-fluid,
+  .pet-gallery .main-media-display video { width: 100%; height: 100%; object-fit: cover; }
+
+  .gallery-thumbnails {
+    list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.25rem;
+  }
+  .gallery-thumbnails .nav-link {
+    padding: 0; border: 2px solid var(--border); border-radius: calc(var(--radius) - 2px);
+    overflow: hidden; width: 78px; height: 78px;
+    transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    outline: none; background: var(--surface);
+  }
+  .gallery-thumbnails .nav-link.active,
+  .gallery-thumbnails .nav-link[aria-selected="true"] {
+    border-color: var(--primary);
+    transform: scale(1.06);
+    box-shadow: var(--shadow-md);
+  }
+  .gallery-thumbnails .nav-link:hover { border-color: var(--primary-light); }
+  .gallery-thumbnails .nav-link:focus-visible { box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .3); }
+  .gallery-thumbnails img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-video {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background-color: var(--surface); color: var(--primary); border: 1px dashed var(--border); font-size: .8rem;
+  }
+  .thumb-video .bi { font-size: 1.75rem; }
+
+  /* Painel de informações */
+  .pet-info-header .badge { font-size: .9rem; padding: .5rem 1rem; }
+
+  .pet-description-box {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+  .pet-description-box h5 { font-family: 'Poppins', sans-serif; font-weight: 600; }
+
+  .info-card {
+    background-color: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem; text-align: center;
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  }
+  .info-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(var(--primary-rgb), .3); }
+  .info-card .icon-circle {
+    width: 50px; height: 50px; margin: 0 auto .75rem;
+    background-color: rgba(var(--primary-rgb), .12); color: var(--primary);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  }
+  .info-card .info-label { color: var(--text-secondary); }
+
+  /* Animação */
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(18px);} to { opacity: 1; transform: translateY(0);} }
+  .fade-in-up { animation: fadeInUp .6s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { .fade-in-up { animation: none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="pet-detail container">
+  <div class="row g-4 g-lg-5">
+
+    <!-- Galeria -->
+    <div class="col-lg-6 fade-in-up" style="animation-delay: 100ms;">
+      <div class="pet-gallery pet-detail-card p-3 p-lg-4" aria-label="Galeria de mídia de {{ pet.nome }}">
+        <div class="tab-content main-media-display" id="petMediaContent">
+          <div class="tab-pane fade show active" id="media-main" role="tabpanel" aria-labelledby="tab-main">
+            <div class="ratio ratio-4x3">
+              <img src="{{ pet.foto_principal.url }}" class="img-fluid" alt="Foto principal de {{ pet.nome }}" loading="lazy" referrerpolicy="no-referrer">
+            </div>
+          </div>
+
+          {% for photo in pet.fotos_extras.all %}
+          <div class="tab-pane fade" id="media-photo-{{ photo.id }}" role="tabpanel" aria-labelledby="tab-photo-{{ photo.id }}">
+            <div class="ratio ratio-4x3">
+              <img src="{{ photo.imagem.url }}" class="img-fluid" alt="Foto extra de {{ pet.nome }}" loading="lazy" referrerpolicy="no-referrer">
+            </div>
+          </div>
+          {% endfor %}
+
+          {% if pet.video %}
+          <div class="tab-pane fade" id="media-video" role="tabpanel" aria-labelledby="tab-video">
+            <div class="ratio ratio-16x9">
+              <video controls preload="metadata" class="w-100 h-100 rounded-3" aria-label="Vídeo de {{ pet.nome }}">
+                <source src="{{ pet.video.url }}" type="video/mp4">
+                Seu navegador não suporta vídeos.
+              </video>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <ul class="nav nav-pills gallery-thumbnails" id="petMedia" role="tablist" aria-label="Miniaturas de mídia">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="tab-main" data-bs-toggle="pill" href="#media-main" role="tab" aria-controls="media-main" aria-selected="true" title="Foto principal">
+              <img src="{{ pet.foto_principal.url }}" alt="Miniatura da foto principal" loading="lazy">
+            </a>
+          </li>
+          {% for photo in pet.fotos_extras.all %}
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-photo-{{ photo.id }}" data-bs-toggle="pill" href="#media-photo-{{ photo.id }}" role="tab" aria-controls="media-photo-{{ photo.id }}" aria-selected="false" title="Foto extra">
+              <img src="{{ photo.imagem.url }}" alt="Miniatura de foto extra" loading="lazy">
+            </a>
+          </li>
+          {% endfor %}
+          {% if pet.video %}
+          <li class="nav-item" role="presentation">
+            <a class="nav-link thumb-video" id="tab-video" data-bs-toggle="pill" href="#media-video" role="tab" aria-controls="media-video" aria-selected="false" title="Assistir vídeo">
+              <i class="bi bi-play-fill" aria-hidden="true"></i>
+              <span class="small">Vídeo</span>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Infos -->
+    <div class="col-lg-6 fade-in-up" style="animation-delay: 250ms;">
+      <div class="pet-detail-card p-4 p-lg-5 h-100 d-flex flex-column">
+        <div class="pet-info-header d-flex flex-wrap align-items-center gap-2 mb-3">
+          <span class="badge text-bg-primary rounded-pill"><i class="bi bi-tag-fill me-1" aria-hidden="true"></i> {{ pet.get_especie_display }}</span>
+          {% if pet.raca %}
+            <span class="badge text-bg-secondary rounded-pill">{{ pet.raca }}</span>
+          {% endif %}
+          <span class="badge rounded-pill" style="background-color: var(--surface); color: var(--text-primary); border: 1px solid var(--border);">
+            <i class="bi bi-calendar-heart me-1" aria-hidden="true"></i> {{ pet.idade }} ano{{ pet.idade|pluralize:"s" }}
+          </span>
+        </div>
+
+        <h1 class="display-5 fw-bold mb-2">{{ pet.nome }}</h1>
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+          {% if pet.status == 'DISPONIVEL' %}
+            <span class="badge text-bg-success rounded-pill"><i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i> {{ pet.get_status_display }}</span>
+          {% else %}
+            <span class="badge text-bg-warning rounded-pill"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i> {{ pet.get_status_display }}</span>
+          {% endif %}
+          <small class="text-muted">Atualizado {{ pet.data_atualizacao|timesince }} atrás</small>
+        </div>
+
+        <div class="pet-description-box mb-4">
+          <h5 class="mb-2">Conheça minha história</h5>
+          <p class="mb-0" style="white-space: pre-line; color: var(--text-secondary);">{{ pet.descricao }}</p>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <div class="info-card h-100">
+              <div class="icon-circle"><i class="bi bi-calendar-check" aria-hidden="true"></i></div>
+              <h6 class="info-label small mb-0">No abrigo desde</h6>
+              <p class="fw-bold mb-0" aria-label="Data de cadastro">{{ pet.data_cadastro|date:"d M, Y" }}</p>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="info-card h-100">
+              <div class="icon-circle"><i class="bi bi-person-hearts" aria-hidden="true"></i></div>
+              <h6 class="info-label small mb-0">Tutor Responsável</h6>
+              <p class="fw-bold mb-0">{{ pet.solicitante.username|default:"FeedPet" }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-auto">
+          {% if user.is_authenticated %}
+            {% if pet.status == 'DISPONIVEL' %}
+              <div class="d-grid gap-2">
+                <a href="https://wa.me/5599999999999?text=Ol%C3%A1!%20Tenho%20interesse%20em%20adotar%20o(a)%20{{ pet.nome|urlencode }}.%20Vi%20no%20site%20FeedPet."
+                   class="btn btn-success btn-lg rounded-pill fw-bold" target="_blank" rel="noopener"
+                   aria-label="Iniciar adoção de {{ pet.nome }} via WhatsApp">
+                  <i class="bi bi-whatsapp me-2" aria-hidden="true"></i> Iniciar Adoção
+                </a>
+                <a href="mailto:contato@feedpet.com?subject=Interesse%20em%20adotar:%20{{ pet.nome|urlencode }}"
+                   class="btn btn-outline-primary btn-lg rounded-pill" aria-label="Contato por e-mail">
+                  <i class="bi bi-envelope-fill me-2" aria-hidden="true"></i> Contato por E-mail
+                </a>
+              </div>
+            {% endif %}
+          {% elif is_visitor %}
+            <div class="alert alert-info text-center">
+              <h5 class="alert-heading">Gostou do(a) {{ pet.nome }}?</h5>
+              <p class="mb-0">As informações de contato são visíveis apenas para usuários cadastrados. <a href="{% url 'landing' %}" class="fw-bold">Faça login ou crie uma conta</a> para continuar!</p>
+            </div>
+          {% endif %}
+        </div>
+
+        {# Correção: sem parênteses na expressão #}
+        {% if user.is_authenticated and user.is_staff or user.is_authenticated and pet.solicitante == user %}
+          <div class="admin-actions mt-4 pt-3 border-top d-flex flex-wrap gap-2">
+            <a href="{% url 'editar_pet' pet.slug %}" class="btn btn-sm btn-warning rounded-pill">
+              <i class="bi bi-pencil-fill me-1" aria-hidden="true"></i> Editar
+            </a>
+            <a href="{% url 'deletar_pet' pet.slug %}" class="btn btn-sm btn-outline-danger rounded-pill">
+              <i class="bi bi-trash-fill me-1" aria-hidden="true"></i> Remover
+            </a>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,5 @@
+MAX_ADDITIONAL_PHOTOS = 5
+ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp']
+ALLOWED_VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'mkv', 'webm']
+MAX_ADDITIONAL_IMAGE_SIZE_MB = 5
+MAX_VIDEO_SIZE_MB = 80

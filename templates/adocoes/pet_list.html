@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Galeria de Pets - Encontre seu Amigo Fiel{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Adiciona a variável de tema para compatibilidade */
+  :root { --surface: var(--bg-secondary); }
+  [data-theme="dark"] { --surface: var(--bg-secondary); }
+
+  /* ====== HERO SECTION REFINADO (RETANGULAR) ====== */
+  .hero-section {
+    position: relative;
+    padding: 6rem 1rem; /* <<< ALTURA REDUZIDA AQUI */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+      linear-gradient(135deg, rgba(var(--primary-rgb), 0.75) 0%, rgba(var(--primary-rgb), 0.85) 100%),
+      url('https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2069&auto=format&fit=crop') center/cover no-repeat;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 4rem;
+    box-shadow: var(--shadow-lg);
+    animation: heroEntrance 1s ease-out forwards;
+  }
+  .hero-content {
+    position: relative; z-index: 2; text-align: center; color: white;
+    max-width: 800px;
+  }
+  .hero-title {
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.2;
+    margin-bottom: 1rem; text-shadow: 0 3px 12px rgba(0,0,0,0.3);
+    animation: fadeInUp 0.8s 0.2s ease-out both;
+  }
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.2rem); opacity: 0.95;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s 0.4s ease-out both;
+  }
+  .cta-button {
+    background: white; border: none; color: var(--primary-dark);
+    font-weight: 700; padding: 0.9rem 2.2rem; border-radius: 100px; font-size: 1.1rem;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+    transition: all var(--transition); box-shadow: var(--shadow-lg);
+    animation: fadeInUp 0.8s 0.6s ease-out both;
+  }
+  .cta-button:hover { 
+    transform: translateY(-3px) scale(1.05); 
+    box-shadow: var(--shadow-xl); 
+    background: white;
+    color: var(--primary-dark);
+  }
+  
+  /* ====== CARDS DE PET ESTILIZADOS ====== */
+  .pet-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out, box-shadow var(--transition), border-color var(--transition);
+    display: flex; flex-direction: column; height: 100%;
+  }
+  .pet-card.is-visible { transform: translateY(0); opacity: 1; }
+  .pet-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+  .pet-card-img-container { position: relative; height: 260px; overflow: hidden; }
+  .pet-card .card-img-top { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+  .pet-card:hover .card-img-top { transform: scale(1.1); }
+  .pet-card-badges { position: absolute; top: 1rem; left: 1rem; display: flex; flex-direction: column; gap: 0.5rem; z-index: 2; }
+  .pet-card-badges .badge {
+    backdrop-filter: blur(8px); background-color: rgba(var(--primary-rgb), 0.85) !important;
+    color: white; padding: 0.5rem 1rem; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 50px;
+  }
+  .admin-actions { position: absolute; top: 1rem; right: 1rem; display: flex; gap: 0.5rem; opacity: 0; transform: scale(0.8); transition: all 0.3s ease; z-index: 3; }
+  .pet-card:hover .admin-actions { opacity: 1; transform: scale(1); }
+  .admin-actions .btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.9); color: var(--text-primary); border: 1px solid var(--border); backdrop-filter: blur(5px); padding: 0; }
+  .pet-card-body { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; text-align: center; }
+  .pet-card-title { font-family: 'Poppins', sans-serif; font-weight: 700; color: var(--text-primary); transition: color var(--transition); }
+  .pet-card:hover .pet-card-title { color: var(--primary); }
+  .pet-card-description { flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-secondary); }
+
+  /* ====== ANIMAÇÕES GERAIS ====== */
+  @keyframes heroEntrance { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4">
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">A felicidade está a uma patinha de distância</h1>
+      <p class="hero-subtitle">Explore perfis de pets incríveis que estão esperando por um lar amoroso. A sua jornada para encontrar um novo amigo começa aqui.</p>
+      
+      <div class="hero-cta">
+        <a href="#pets-grid" class="cta-button"><i class="bi bi-heart-fill"></i> Explorar Pets</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container my-5">
+    <form method="get" class="row g-3 align-items-center justify-content-center p-4 rounded-3 shadow-sm" style="background: var(--surface); border: 1px solid var(--border);">
+      <div class="col-lg-5 col-md-12">
+        <input type="text" name="nome" class="form-control form-control-lg" placeholder="Buscar por nome..." value="{{ request.GET.nome }}">
+      </div>
+      <div class="col-lg-5 col-md-12">
+        <select name="especie" class="form-select form-select-lg">
+          <option value="">Todas as espécies</option>
+          {% for value, label in especies %}
+            <option value="{{ value }}" {% if value == request.GET.especie %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-12 d-grid">
+        <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-funnel-fill"></i><span>Filtrar</span></button>
+      </div>
+    </form>
+  </div>
+
+  <div class="container" id="pets-grid">
+    {% if pets %}
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 pets-grid">
+        {% for pet in pets %}
+          <div class="col animate-on-scroll">
+            <div class="card pet-card">
+              {% if user.is_staff %}
+                <div class="admin-actions">
+                  <a href="{% url 'editar_pet' pet.slug %}" class="btn" title="Editar Pet"><i class="bi bi-pencil-fill"></i></a>
+                  <a href="{% url 'deletar_pet' pet.slug %}" class="btn" title="Excluir Pet"><i class="bi bi-trash-fill text-danger"></i></a>
+                </div>
+              {% endif %}
+
+              <div class="pet-card-img-container">
+                <img src="{{ pet.foto_principal.url }}" class="card-img-top" alt="{{ pet.nome }}" loading="lazy">
+                <div class="pet-card-badges">
+                  <span class="badge"><i class="bi bi-tag-fill me-1"></i> {{ pet.get_especie_display }}</span>
+                  <span class="badge"><i class="bi bi-calendar-heart me-1"></i> {{ pet.idade }} ano{{ pet.idade|pluralize:"s" }}</span>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <h5 class="pet-card-title">{{ pet.nome }}</h5>
+                <p class="pet-card-description">{{ pet.descricao|truncatewords:15 }}</p>
+                
+                <div class="mt-auto pt-3 border-top">
+                  {% if user.is_authenticated %}
+                    <a href="{{ pet.get_absolute_url }}" class="btn btn-primary w-100"><i class="bi bi-heart"></i><span>Conhecer {{ pet.nome }}</span></a>
+                  {% else %}
+                    <a href="{{ pet.get_absolute_url }}" class="btn btn-outline-secondary w-100">Ver Detalhes</a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if is_paginated %}
+        <nav class="mt-5" aria-label="Navegação de páginas">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.nome %}&nome={{ request.GET.nome }}{% endif %}{% if request.GET.especie %}&especie={{ request.GET.especie }}{% endif %}">&laquo;</a></li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.nome %}&nome={{ request.GET.nome }}{% endif %}{% if request.GET.especie %}&especie={{ request.GET.especie }}{% endif %}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.nome %}&nome={{ request.GET.nome }}{% endif %}{% if request.GET.especie %}&especie={{ request.GET.especie }}{% endif %}">&raquo;</a></li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="text-center p-5 rounded-3" style="background: var(--surface); border: 1px solid var(--border);">
+        <h3>Nenhum pet encontrado</h3>
+        <p>Tente ajustar os filtros ou volte mais tarde para encontrar seu novo amigo.</p>
+        <a href="{% url 'galeria_pets' %}" class="btn btn-primary mt-2"><i class="bi bi-arrow-clockwise"></i><span>Limpar Filtros</span></a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  'use strict';
+  
+  const animatedElements = document.querySelectorAll('.animate-on-scroll');
+  if (animatedElements.length > 0 && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelector('.pet-card').classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    animatedElements.forEach((el, index) => {
+      el.querySelector('.pet-card').style.transitionDelay = `${index * 100}ms`;
+      observer.observe(el);
+    });
+  }
+
+  const ctaButton = document.querySelector('.cta-button');
+  if (ctaButton) {
+    ctaButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetElement = document.querySelector(this.getAttribute('href'));
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
