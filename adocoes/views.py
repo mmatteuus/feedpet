@@ -1,4 +1,5 @@
 # adocoes/views.py
+import os
 from django.urls import reverse_lazy
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import AccessMixin, UserPassesTestMixin, LoginRequiredMixin
@@ -89,6 +90,12 @@ class PetListView(VisitorOrUserRequiredMixin, ListView):
     template_name = 'adocoes/pet_list.html'
     context_object_name = 'pets'
     paginate_by = 8
+
+    def get_paginate_by(self, queryset):
+        # Disable pagination when building the static preview for Netlify.
+        if os.getenv("STATIC_BUILD"):
+            return None
+        return super().get_paginate_by(queryset)
 
     def get_queryset(self):
         # AQUI ESTÁ A NOVA LÓGICA INTELIGENTE
