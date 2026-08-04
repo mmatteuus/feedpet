@@ -3,9 +3,27 @@ __pycache__/
 *.py[cod]
 *.pyo
 
-# Virtual envs
-venv/
+# Virtual environments
 .venv/
+venv/
+env/
 
-# Build outputs
+# Local data
+/db.sqlite3
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Build and test artifacts
 netlify_dist/
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
