@@ -1,26 +1,30 @@
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
+*$py.class
 
 # Virtual environments
 .venv/
 venv/
 env/
 
-# Local data
-/db.sqlite3
+# Django
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+*.log
 
 # Environment variables
 .env
 .env.*
 !.env.example
 
-# Build and test artifacts
-netlify_dist/
+# Tests and build outputs
+.pytest_cache/
 .coverage
 htmlcov/
-.pytest_cache/
+netlify_dist/
 
 # Editors and operating systems
 .vscode/

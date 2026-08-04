@@ -72,7 +72,6 @@ O banco local, arquivos enviados pelos usuários, ambientes virtuais e artefatos
 adocoes/        domínio, modelos, formulários, views e rotas
 core/           configuração do projeto Django
 templates/      páginas HTML
-media/          arquivos de demonstração utilizados na prévia estática
 build_static.py geração opcional da prévia estática
 ```
 
